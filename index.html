@@ -1,2 +1,669 @@
-<h1> Hi </h1>
-<h1> Coming Soon! </h1>
+<html>
+
+<head>
+  <title>Learning to Upsample and Upmix Audio in the Latent Domain</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+  <meta name="theme-color" content="#563d7c">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      table-layout: fixed;
+    }
+
+
+    td, th {
+      margin: 0 auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+    }
+
+    audio {
+      width: 100%;
+      /* height: 70%; */
+    }
+
+    .vertical-text {
+        writing-mode: vertical-lr; /* Orient text vertically */
+        transform: rotate(180deg); /* Rotate text to face the right way up */
+    }
+  </style>
+</head>
+
+<body bgcolor="#FFFFFF" link="#000000" vlink="#000000" alink="#000000">
+  <div class="text-center">
+    <br>
+    <div class="text-wrap" width="200px">
+      <font face="helvetica , ariel, &#39;sans serif&#39;" size="6">
+        <b>Learning to Upsample and Upmix Audio in the Latent Domain</b><br><br>
+      </font>
+    </div>
+
+
+
+    <div class="m-5">
+      <a class="btn btn-outline-dark" href="https://arxiv.org/" type="button"><i
+          class="bi bi-newspaper"></i> Paper</a>
+      <!-- <a class="btn btn-outline-dark" href="https://youtu.be/" type="button"> <i
+          class="bi bi-camera-reels"></i> Video</a> -->
+      <!-- <a class="btn btn-outline-dark" href="https://huggingface.co/" type="button"> <i
+            class=""></i> &#129303; HF paper</a> -->
+          
+    </div>
+
+    <div class="container mt-4" style="max-width: 1500px;">
+      <div class="container">
+
+        <div class="container mt-4 " style="max-width: 1400px;">
+          <div class="container">
+            <div class="section">
+              <br>
+              <!-- Show Abstract -->
+              <h1 class="text-justify">Abstract</h1>
+              <hr>
+              <p class="pr-5 pl-5 text-justify">
+                Neural audio autoencoders create compact latent representations that preserve perceptually important information, serving as the foundation for both modern audio compression systems and generation approaches like next-token prediction and latent diffusion.
+                Despite their prevalence, most audio processing operations, such as spatial and spectral up-sampling, still inefficiently operate on raw waveforms or spectral representations rather than directly on these compressed representations.
+                We propose a framework that performs audio processing operations entirely within an autoencoder's latent space, eliminating the need to decode to raw audio formats.
+                Our approach dramatically simplifies training by operating solely in the latent domain, with a latent L1 reconstruction term, augmented by a single latent adversarial discriminator.
+                This contrasts sharply with raw-audio methods that typically require complex combinations of multi-scale losses and discriminators.
+                Through experiments in bandwidth extension and mono-to-stereo up-mixing, we demonstrate computational efficiency gains of up to 100x while maintaining quality comparable to post-processing on raw audio.
+                This work establishes a more efficient paradigm for audio processing pipelines that already incorporate autoencoders, enabling significantly faster and more resource-efficient workflows across various audio tasks.              </p>
+            </div><br>
+
+
+            <div class="section text-justify">
+              <h1>Bandwidth Extension Examples </h1>
+
+              <table class="table table-sm text-center" style="vertical-align: middle;">
+                <thead>
+                  <tr>
+                    <th colspan="80"><h6 class="text-center">Original Full-Band (VAE pass)</h6></th>
+                    <th colspan="80"><h6 class="text-center">Input (VAE pass)</h6></th>
+                    <th colspan="80"><h6 class="text-center">VAE + MusicHiFi-BWE </h6></th>
+                    <th colspan="80"><h6 class="text-center">Ours (M) BWE</h6></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_0_vae_fb_bwe.png" alt="Full-Band Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_0_vae_fb_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_0_vae_lb_bwe_2.png" alt="Low-Band Input Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_0_vae_lb_bwe_2.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_0_mhifi_bwe.png" alt="VAE + MH-BWE Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_0_mhifi_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_0_re_bwe_M.png" alt="Ours (M) Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_0_re_bwe_M.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_1_vae_fb_bwe.png" alt="Full-Band Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_1_vae_fb_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_1_vae_lb_bwe_2.png" alt="Low-Band Input Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_1_vae_lb_bwe_2.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_1_mhifi_bwe.png" alt="VAE + MH-BWE Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_1_mhifi_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_1_re_bwe_M.png" alt="Ours (M) Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_1_re_bwe_M.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+
+                  <tr>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_3_vae_fb_bwe.png" alt="Full-Band Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_3_vae_fb_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_3_vae_lb_bwe_2.png" alt="Low-Band Input Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_3_vae_lb_bwe_2.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_3_mhifi_bwe.png" alt="VAE + MH-BWE Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_3_mhifi_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_3_re_bwe_M.png" alt="Ours (M) Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_3_re_bwe_M.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_4_vae_fb_bwe.png" alt="Full-Band Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_4_vae_fb_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_4_vae_lb_bwe_2.png" alt="Low-Band Input Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_4_vae_lb_bwe_2.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_4_mhifi_bwe.png" alt="VAE + MH-BWE Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_4_mhifi_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_4_re_bwe_M.png" alt="Ours (M) Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_4_re_bwe_M.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_5_vae_fb_bwe.png" alt="Full-Band Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_5_vae_fb_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_5_vae_lb_bwe_2.png" alt="Low-Band Input Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_5_vae_lb_bwe_2.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_5_mhifi_bwe.png" alt="VAE + MH-BWE Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_5_mhifi_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_5_re_bwe_M.png" alt="Ours (M) Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_5_re_bwe_M.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_6_vae_fb_bwe.png" alt="Full-Band Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_6_vae_fb_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_6_vae_lb_bwe_2.png" alt="Low-Band Input Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_6_vae_lb_bwe_2.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_6_mhifi_bwe.png" alt="VAE + MH-BWE Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_6_mhifi_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_6_re_bwe_M.png" alt="Ours (M) Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_6_re_bwe_M.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_7_vae_fb_bwe.png" alt="Full-Band Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_7_vae_fb_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_7_vae_lb_bwe_2.png" alt="Low-Band Input Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_7_vae_lb_bwe_2.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_7_mhifi_bwe.png" alt="VAE + MH-BWE Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_7_mhifi_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_7_re_bwe_M.png" alt="Ours (M) Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_7_re_bwe_M.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_10_vae_fb_bwe.png" alt="Full-Band Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_10_vae_fb_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_10_vae_lb_bwe_2.png" alt="Low-Band Input Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_10_vae_lb_bwe_2.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_10_mhifi_bwe.png" alt="VAE + MH-BWE Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_10_mhifi_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_10_re_bwe_M.png" alt="Ours (M) Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_10_re_bwe_M.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_11_vae_fb_bwe.png" alt="Full-Band Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_11_vae_fb_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_11_vae_lb_bwe_2.png" alt="Low-Band Input Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_11_vae_lb_bwe_2.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_11_mhifi_bwe.png" alt="VAE + MH-BWE Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_11_mhifi_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_11_re_bwe_M.png" alt="Ours (M) Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_11_re_bwe_M.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_12_vae_fb_bwe.png" alt="Full-Band Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_12_vae_fb_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_12_vae_lb_bwe_2.png" alt="Low-Band Input Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_12_vae_lb_bwe_2.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_12_mhifi_bwe.png" alt="VAE + MH-BWE Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_12_mhifi_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_12_re_bwe_M.png" alt="Ours (M) Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_12_re_bwe_M.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_13_vae_fb_bwe.png" alt="Full-Band Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_13_vae_fb_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_13_vae_lb_bwe_2.png" alt="Low-Band Input Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_13_vae_lb_bwe_2.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_13_mhifi_bwe.png" alt="VAE + MH-BWE Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_13_mhifi_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_13_re_bwe_M.png" alt="Ours (M) Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_13_re_bwe_M.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_14_vae_fb_bwe.png" alt="Full-Band Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_14_vae_fb_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_14_vae_lb_bwe_2.png" alt="Low-Band Input Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_14_vae_lb_bwe_2.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_14_mhifi_bwe.png" alt="VAE + MH-BWE Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_14_mhifi_bwe.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <img src="assets_bwe/sample_14_re_bwe_M.png" alt="Ours (M) Spectrogram" style="width: 100%; height: auto;">
+                      <audio controls><source src="assets_bwe/sample_14_re_bwe_M.wav" type="audio/mpeg"></audio>
+                    </td>
+
+                    <tr>
+                        <td colspan="80">
+                          <img src="assets_bwe/sample_28_vae_fb_bwe.png" alt="Full-Band Spectrogram" style="width: 100%; height: auto;">
+                          <audio controls><source src="assets_bwe/sample_28_vae_fb_bwe.wav" type="audio/mpeg"></audio>
+                        </td>
+                        <td colspan="80">
+                          <img src="assets_bwe/sample_28_vae_lb_bwe_2.png" alt="Low-Band Input Spectrogram" style="width: 100%; height: auto;">
+                          <audio controls><source src="assets_bwe/sample_28_vae_lb_bwe_2.wav" type="audio/mpeg"></audio>
+                        </td>
+                        <td colspan="80">
+                          <img src="assets_bwe/sample_28_mhifi_bwe.png" alt="VAE + MH-BWE Spectrogram" style="width: 100%; height: auto;">
+                          <audio controls><source src="assets_bwe/sample_28_mhifi_bwe.wav" type="audio/mpeg"></audio>
+                        </td>
+                        <td colspan="80">
+                          <img src="assets_bwe/sample_28_re_bwe_M.png" alt="Ours (M) Spectrogram" style="width: 100%; height: auto;">
+                          <audio controls><source src="assets_bwe/sample_28_re_bwe_M.wav" type="audio/mpeg"></audio>
+                        </td>
+                    </tr>
+
+
+                </tbody>
+              </table>
+
+            </div>
+
+
+            <div class="section text-justify">
+              <h1>Mono-to-Stereo Examples</h1>
+          
+              <table class="table table-sm text-center" style="vertical-align: middle;">
+                <thead>
+                  <tr>
+                    <th colspan="80"><h6 class="text-center">Original Stereo (VAE pass)</h6></th>
+                    <th colspan="80"><h6 class="text-center">Mono Input (VAE pass)</h6></th>
+                    <th colspan="80"><h6 class="text-center">VAE + MuiscHiFi-M2S</h6></th>
+                    <th colspan="80"><h6 class="text-center">Ours (M) Blind Upmixing</h6></th>
+                  </tr>
+                </thead>
+                <tbody>
+
+
+                  <tr>  
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_1_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_1_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_1_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_1_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>  
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_3_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_3_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_3_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_3_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>  
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_4_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_4_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_4_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_4_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>  
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_5_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_5_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_5_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_5_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_8_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_8_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_8_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_8_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_9_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_9_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_9_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_9_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_10_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_10_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_10_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_10_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_11_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_11_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_11_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_11_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_14_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_14_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_14_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_14_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_17_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_17_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_17_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_17_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_18_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_18_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_18_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_18_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_19_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_19_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_19_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_19_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_22_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_22_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_22_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_22_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr> 
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_24_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_24_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_24_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_24_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_25_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_25_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_25_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_25_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_26_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_26_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_26_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_26_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_27_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_27_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_27_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_27_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_29_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_29_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_29_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_29_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr> 
+
+                  <tr>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_31_vae_gt_stereo.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_31_vae_gt_mono.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_31_mhifi_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                    <td colspan="80">
+                      <audio controls><source src="assets_m2s/sample_31_re_m2s.wav" type="audio/mpeg"></audio>
+                    </td>
+                  </tr> 
+
+                </tbody>
+              </table>
+
+            </div>
+
+
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</body>
+
+</html>
